@@ -1,18 +1,6 @@
-﻿using SqueezeNet.Library;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
+using SqueezeNet.Library;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace SqueezeNet.UI
 {
@@ -26,8 +14,8 @@ namespace SqueezeNet.UI
             InitializeComponent();
             
             ObjectDetectionModel c = new ObjectDetectionModel();
-            c.RunModel(@"..\..\..\..\..\SharedContent\models\SqueezeNet.onnx", 
-                @"..\..\..\..\..\SharedContent\media\fish.png");
+            var bytes = File.ReadAllBytes(@"..\..\..\..\..\SharedContent\media\fish.png");
+            c.RunModel(@"..\..\..\..\..\SharedContent\models\SqueezeNet.onnx", bytes);
         }
     }
 }

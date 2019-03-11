@@ -7,9 +7,9 @@ using Windows.AI.MachineLearning;
 using Windows.Foundation;
 using Windows.Graphics.Imaging;
 using Windows.Media;
-using Windows.Storage;
 using Windows.Storage.Streams;
 using Newtonsoft.Json;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace SqueezeNet.Library
 {
@@ -17,12 +17,11 @@ namespace SqueezeNet.Library
     {
         private LearningModel _model;
         private LearningModelSession _session;
-        private static LearningModelDeviceKind _deviceKind = LearningModelDeviceKind.Default;
         private static string _deviceName = "default";
         private static List<string> _labels = new List<string>();        
         private static string _labelsFileName = "Assets/Labels.json";
 
-        public void RunModel(string modelPath, string imagePath)
+        public void RunModel(string modelPath, byte[] image)
         {
             // Load and create the model 
             Console.WriteLine($"Loading modelfile '{modelPath}' on the '{_deviceName}' device");
@@ -36,7 +35,7 @@ namespace SqueezeNet.Library
             _session = new LearningModelSession(_model, new LearningModelDevice(LearningModelDeviceKind.Default));
 
             Console.WriteLine("Loading the image...");
-            ImageFeatureValue imageTensor = LoadImageFile(imagePath);
+            ImageFeatureValue imageTensor = LoadImageFile(image);
 
             // create a binding object from the session
             Console.WriteLine("Binding...");
@@ -52,6 +51,12 @@ namespace SqueezeNet.Library
             // retrieve results from evaluation
             TensorFloat resultTensor = results.Outputs[_model.OutputFeatures.ElementAt(0).Name] as TensorFloat;
             IReadOnlyList<float> resultVector = resultTensor.GetAsVectorView();
+
+            foreach ( float item in resultVector )
+            {
+                Console.WriteLine(item);
+            }
+
             PrintResults(resultVector, _labelsFileName);
         }
 
@@ -81,12 +86,10 @@ namespace SqueezeNet.Library
             return operation.GetResults();
         }
 
-        private static ImageFeatureValue LoadImageFile(string imagePath)
+        private static ImageFeatureValue LoadImageFile(byte[] image)
         {
-            imagePath = Path.GetFullPath(imagePath);
-            StorageFile imageFile = AsyncHelper(StorageFile.GetFileFromPathAsync(imagePath));
-            IRandomAccessStream stream = AsyncHelper(imageFile.OpenReadAsync());
-            BitmapDecoder decoder = AsyncHelper(BitmapDecoder.CreateAsync(stream));
+            IRandomAccessStream ras2 = image.AsBuffer().AsStream().AsRandomAccessStream();
+            BitmapDecoder decoder = AsyncHelper(BitmapDecoder.CreateAsync(ras2));
             SoftwareBitmap softwareBitmap = AsyncHelper(decoder.GetSoftwareBitmapAsync());
             softwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
             VideoFrame inputImage = VideoFrame.CreateWithSoftwareBitmap(softwareBitmap);

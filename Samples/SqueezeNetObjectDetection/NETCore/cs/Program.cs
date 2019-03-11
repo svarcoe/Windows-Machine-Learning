@@ -14,6 +14,7 @@ namespace SqueezeNetObjectDetectionNC
         private static LearningModel _model = null;
         private static LearningModelSession _session;
         private static List<string> _labels = new List<string>();
+        private static LearningModelDeviceKind _deviceKind = LearningModelDeviceKind.Default;
 
         // usage: SqueezeNet [modelfile] [imagefile] [cpu|directx]
         static int Main(string[] args)
@@ -24,7 +25,7 @@ namespace SqueezeNetObjectDetectionNC
                 return -1;
             }
             ObjectDetectionModel c = new ObjectDetectionModel();
-            c.RunModel(_modelPath, _imagePath);
+            //c.RunModel(_modelPath, _imagePath);
             
             return 0;
         }
